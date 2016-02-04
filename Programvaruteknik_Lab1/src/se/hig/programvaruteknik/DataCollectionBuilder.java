@@ -1,45 +1,37 @@
 package se.hig.programvaruteknik;
 
+import java.util.List;
 import java.util.Map;
 
 public class DataCollectionBuilder
 {
-    private Map<String, MatchedDataPair> data;
-    private String title;
-    private String xUnit;
-    private String yUnit;
+    private String title = null;
+    private DataSource xData;
+    private DataSource yData;
+    private Resolution resolution;
+    private Map<String, List<MatchedDataPair>> resultData;
+    private Map<String, MatchedDataPair> finalResult;
 
-    public DataCollectionBuilder(String title, String xUnit, String yUnit, Map<String, MatchedDataPair> data)
+    public DataCollectionBuilder(DataSource xData, DataSource yData, Resolution resolution)
     {
-	this.data = data;
+	this.xData = xData;
+	this.yData = yData;
+	this.resolution = resolution;
+    }
+
+    public DataCollectionBuilder setTitle(String title)
+    {
 	this.title = title;
-	this.xUnit = xUnit;
-	this.yUnit = yUnit;
+	return this;
     }
 
     public String getTitle()
     {
-	return title;
+	return title == null ? (xData.getName() + " : " + yData.getName()) : title;
     }
 
-    public String getXUnit()
+    public DataCollection getResult()
     {
-	return xUnit;
-    }
-
-    public String getYUnit()
-    {
-	return yUnit;
-    }
-
-    public Map<String, MatchedDataPair> getData()
-    {
-	return data;
-    }
-
-    @Override
-    public String toString()
-    {
-	return "[DataCollectionBuilder: " + title + "]";
+	return null;// TODO: implement
     }
 }
