@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class DataCollectionBuilder {
 	private MergeType xMergeType = MergeType.SUM;
@@ -67,16 +68,35 @@ public class DataCollectionBuilder {
 		resultData.get(key).add(pair);
 	}
 
+	private class DataPair {
+		public LocalDate key;
+		public Double value;
+
+		public DataPair(LocalDate key, Double value) {
+			this.key = key;
+			this.value = value;
+		}
+	}
+
 	public DataCollection getResult() {
+		List<DataPair> ys = yData.getData().entrySet().stream().map((d) -> new DataPair(d.getKey(), d.getValue()))
+				.collect(Collectors.toList());
+
 		for (Entry<LocalDate, Double> x : xData.getData().entrySet()) {
-			for (Entry<LocalDate, Double> y : yData.getData().entrySet()) {
-				if (localDateToString(x.getKey(), resolution).equals(localDateToString(y.getKey(), resolution))) {
-					put(localDateToString(x.getKey(), resolution), new MatchedDataPair(x.getValue(), y.getValue()));
+			for (DataPair y : ys.toArray(new DataPair[0])) {
+				if (localDateToString(x.getKey(), resolution).equals(localDateToString(y.key, resolution))) {
+					put(localDateToString(x.getKey(), resolution), new MatchedDataPair(x.getValue(), y.value));
+					ys.remove(y);
+
+					// System.out.println(localDateToString(x.getKey(),
+					// resolution) + ": " + new MatchedDataPair(x.getValue(),
+					// y.value));
 				}
 			}
 		}
 
 		for (Entry<String, List<MatchedDataPair>> node : resultData.entrySet()) {
+
 			Double xSum = 0d;
 			for (MatchedDataPair pair : node.getValue()) {
 				xSum += pair.getXValue();
