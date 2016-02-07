@@ -394,4 +394,94 @@ public class TestDataCollectionBuilder
 	    }
 	});
     }
+
+    @Test
+    public void testDay_MEDIAN()
+    {
+	testCollection(Resolution.DAY, MergeType.MEDIAN, (date, x, y) ->
+	{
+	    assertEquals("Incorrect value", new Double(1), x);
+	    assertEquals("Incorrect value", new Double(2), y);
+	});
+    }
+
+    @Test
+    public void testWeek_MEDIAN()
+    {
+	testCollection(Resolution.WEEK, MergeType.MEDIAN, (date, x, y) ->
+	{
+	    assertEquals("Incorrect value", new Double(1), x);
+	    assertEquals("Incorrect value", new Double(2), y);
+	});
+    }
+
+    @Test
+    public void testMonth_MEDIAN()
+    {
+	testCollection(Resolution.MONTH, MergeType.MEDIAN, (date, x, y) ->
+	{
+	    switch (date.getMonth())
+	    {
+	    case JANUARY:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    case FEBRUARY:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    case MARCH:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    default:
+		fail("Unexpected month");
+		break;
+	    }
+	});
+    }
+
+    @Test
+    public void testQuarter_MEDIAN()
+    {
+	testCollection(Resolution.QUARTER, MergeType.MEDIAN, (date, x, y) ->
+	{
+	    switch (date.getYear())
+	    {
+	    case 2016:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    case 2017:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    default:
+		fail("Unexpected year");
+		break;
+	    }
+	});
+    }
+
+    @Test
+    public void testYear_MEDIAN()
+    {
+	testCollection(Resolution.YEAR, MergeType.MEDIAN, (date, x, y) ->
+	{
+	    switch (date.getYear())
+	    {
+	    case 2016:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    case 2017:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    default:
+		fail("Unexpected year");
+		break;
+	    }
+	});
+    }
 }

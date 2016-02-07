@@ -14,7 +14,10 @@ public enum MergeType
     /**
      * Take the average of all values
      */
-    AVERAGE
+    AVERAGE,
 
-    // , MEDIAN
+    /**
+     * Take the median of the values
+     */
+    MEDIAN
 }

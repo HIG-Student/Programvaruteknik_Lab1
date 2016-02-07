@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -115,16 +116,33 @@ public class DataCollectionBuilder
 	resultData.get(key).add(pair);
     }
 
-    private class DataPair
+    static Double mergeData(List<MatchedDataPair> data, MergeType mergeType, boolean xValue)
     {
-	public LocalDate key;
-	public Double value;
-
-	public DataPair(LocalDate key, Double value)
+	Double value = 0d;
+	if (mergeType == MergeType.MEDIAN)
 	{
-	    this.key = key;
-	    this.value = value;
+	    MatchedDataPair median = data.get((int) Math.floor(data.size() / 2));
+	    value = xValue ? median.getXValue() : median.getYValue();
 	}
+	else
+	{
+	    for (MatchedDataPair pair : data)
+	    {
+		value += xValue ? pair.getXValue() : pair.getYValue();
+	    }
+
+	    if (mergeType == MergeType.AVERAGE)
+	    {
+		value /= data.size();
+	    }
+	}
+
+	return value;
+    }
+
+    static MatchedDataPair mergeData(List<MatchedDataPair> data, MergeType xMergeType, MergeType yMergeType)
+    {
+	return new MatchedDataPair(mergeData(data, xMergeType, true), mergeData(data, yMergeType, false));
     }
 
     /**
@@ -134,63 +152,23 @@ public class DataCollectionBuilder
      */
     public DataCollection getResult()
     {
-	List<DataPair> ys = yData
-		.getData()
-		.entrySet()
-		.stream()
-		.map((d) -> new DataPair(d.getKey(), d.getValue()))
-		.collect(Collectors.toList());
+	Set<Entry<LocalDate, Double>> yDataPairs = yData.getData().entrySet();
 
-	for (Entry<LocalDate, Double> x : xData.getData().entrySet())
+	for (Entry<LocalDate, Double> xData : xData.getData().entrySet())
 	{
-	    for (DataPair y : ys.toArray(new DataPair[0]))
+	    for (Entry<LocalDate, Double> yData : yDataPairs.stream().collect(Collectors.toList()))
 	    {
-		if (localDateToString(x.getKey(), resolution).equals(localDateToString(y.key, resolution)))
+		if (localDateToString(xData.getKey(), resolution).equals(localDateToString(yData.getKey(), resolution)))
 		{
-		    put(localDateToString(x.getKey(), resolution), new MatchedDataPair(x.getValue(), y.value));
-		    ys.remove(y);
-
-		    // System.out.println(localDateToString(x.getKey(),
-		    // resolution) + ": " + new MatchedDataPair(x.getValue(),
-		    // y.value));
+		    put(localDateToString(xData.getKey(), resolution), new MatchedDataPair(xData.getValue(), yData.getValue()));
+		    yDataPairs.remove(yData);
 		}
 	    }
 	}
 
 	for (Entry<String, List<MatchedDataPair>> node : resultData.entrySet())
 	{
-
-	    Double xSum = 0d;
-	    for (MatchedDataPair pair : node.getValue())
-	    {
-		xSum += pair.getXValue();
-	    }
-
-	    switch (xMergeType)
-	    {
-	    case AVERAGE:
-		xSum /= node.getValue().size();
-		break;
-	    case SUM:
-		break;
-	    }
-
-	    Double ySum = 0d;
-	    for (MatchedDataPair pair : node.getValue())
-	    {
-		ySum += pair.getYValue();
-	    }
-
-	    switch (yMergeType)
-	    {
-	    case AVERAGE:
-		ySum /= node.getValue().size();
-		break;
-	    case SUM:
-		break;
-	    }
-
-	    finalResult.put(node.getKey(), new MatchedDataPair(xSum, ySum));
+	    finalResult.put(node.getKey(), mergeData(node.getValue(), xMergeType, yMergeType));
 	}
 
 	return new DataCollection(getTitle(), xData.getUnit(), yData.getUnit(), finalResult);
