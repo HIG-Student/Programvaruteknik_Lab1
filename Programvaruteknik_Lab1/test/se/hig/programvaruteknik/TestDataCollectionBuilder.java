@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class TestDataCollectionBuilder
 {
     @Test
