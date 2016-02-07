@@ -182,20 +182,17 @@ public class TestDataCollectionBuilder
 	});
     }
 
-    private DataCollection createCollection(Resolution resolution)
-    {
-	return new DataCollectionBuilder(getDataSourceA(), getDataSourceB(), resolution).getResult();
-    }
-
     private interface testCollectionCase
     {
 	public void test(LocalDate date, Double x, Double y);
     }
 
-    private void testCollection(Resolution resolution, testCollectionCase testCase)
+    private void testCollection(Resolution resolution, MergeType mergeType, testCollectionCase testCase)
     {
-	DataCollection coll = createCollection(resolution);
-	Map<String, MatchedDataPair> data = coll.getData();
+	DataCollectionBuilder builder = new DataCollectionBuilder(getDataSourceA(), getDataSourceB(), resolution);
+	builder.setXMergeType(mergeType);
+	builder.setYMergeType(mergeType);
+	Map<String, MatchedDataPair> data = builder.getResult().getData();
 	for (LocalDate date : dates)
 	{
 	    String key = DataCollectionBuilder.localDateToString(date, resolution);
@@ -219,9 +216,9 @@ public class TestDataCollectionBuilder
     }
 
     @Test
-    public void testDay()
+    public void testDay_SUM()
     {
-	testCollection(Resolution.DAY, (date, x, y) ->
+	testCollection(Resolution.DAY, MergeType.SUM, (date, x, y) ->
 	{
 	    assertEquals("Incorrect value", new Double(1), x);
 	    assertEquals("Incorrect value", new Double(2), y);
@@ -229,9 +226,9 @@ public class TestDataCollectionBuilder
     }
 
     @Test
-    public void testWeek()
+    public void testWeek_SUM()
     {
-	testCollection(Resolution.WEEK, (date, x, y) ->
+	testCollection(Resolution.WEEK, MergeType.SUM, (date, x, y) ->
 	{
 	    assertEquals("Incorrect value", new Double(7), x);
 	    assertEquals("Incorrect value", new Double(14), y);
@@ -239,9 +236,9 @@ public class TestDataCollectionBuilder
     }
 
     @Test
-    public void testMonth()
+    public void testMonth_SUM()
     {
-	testCollection(Resolution.MONTH, (date, x, y) ->
+	testCollection(Resolution.MONTH, MergeType.SUM, (date, x, y) ->
 	{
 	    switch (date.getMonth())
 	    {
@@ -265,9 +262,9 @@ public class TestDataCollectionBuilder
     }
 
     @Test
-    public void testQuarter()
+    public void testQuarter_SUM()
     {
-	testCollection(Resolution.QUARTER, (date, x, y) ->
+	testCollection(Resolution.QUARTER, MergeType.SUM, (date, x, y) ->
 	{
 	    switch (date.getYear())
 	    {
@@ -287,9 +284,9 @@ public class TestDataCollectionBuilder
     }
 
     @Test
-    public void testYear()
+    public void testYear_SUM()
     {
-	testCollection(Resolution.YEAR, (date, x, y) ->
+	testCollection(Resolution.YEAR, MergeType.SUM, (date, x, y) ->
 	{
 	    switch (date.getYear())
 	    {
@@ -300,6 +297,96 @@ public class TestDataCollectionBuilder
 	    case 2017:
 		assertEquals(new Double(7), x);
 		assertEquals(new Double(14), y);
+		break;
+	    default:
+		fail("Unexpected year");
+		break;
+	    }
+	});
+    }
+
+    @Test
+    public void testDay_AVERAGE()
+    {
+	testCollection(Resolution.DAY, MergeType.AVERAGE, (date, x, y) ->
+	{
+	    assertEquals("Incorrect value", new Double(1), x);
+	    assertEquals("Incorrect value", new Double(2), y);
+	});
+    }
+
+    @Test
+    public void testWeek_AVERAGE()
+    {
+	testCollection(Resolution.WEEK, MergeType.AVERAGE, (date, x, y) ->
+	{
+	    assertEquals("Incorrect value", new Double(1), x);
+	    assertEquals("Incorrect value", new Double(2), y);
+	});
+    }
+
+    @Test
+    public void testMonth_AVERAGE()
+    {
+	testCollection(Resolution.MONTH, MergeType.AVERAGE, (date, x, y) ->
+	{
+	    switch (date.getMonth())
+	    {
+	    case JANUARY:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    case FEBRUARY:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    case MARCH:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    default:
+		fail("Unexpected month");
+		break;
+	    }
+	});
+    }
+
+    @Test
+    public void testQuarter_AVERAGE()
+    {
+	testCollection(Resolution.QUARTER, MergeType.AVERAGE, (date, x, y) ->
+	{
+	    switch (date.getYear())
+	    {
+	    case 2016:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    case 2017:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    default:
+		fail("Unexpected year");
+		break;
+	    }
+	});
+    }
+
+    @Test
+    public void testYear_AVERAGE()
+    {
+	testCollection(Resolution.YEAR, MergeType.AVERAGE, (date, x, y) ->
+	{
+	    switch (date.getYear())
+	    {
+	    case 2016:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
+		break;
+	    case 2017:
+		assertEquals(new Double(1), x);
+		assertEquals(new Double(2), y);
 		break;
 	    default:
 		fail("Unexpected year");
