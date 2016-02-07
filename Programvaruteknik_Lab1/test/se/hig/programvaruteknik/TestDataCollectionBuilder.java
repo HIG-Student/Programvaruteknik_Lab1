@@ -208,11 +208,14 @@ public class TestDataCollectionBuilder
     @Test
     public void testTitle()
     {
-	testCollection(Resolution.DAY, (date, x, y) ->
-	{
-	    assertEquals("Incorrect value", new Double(1), x);
-	    assertEquals("Incorrect value", new Double(2), y);
-	});
+	DataCollectionBuilder builder = new DataCollectionBuilder(getDataSourceA(), getDataSourceB(), Resolution.DAY);
+	assertEquals("sourceA : sourceB", builder.getTitle());
+	assertEquals("sourceA : sourceB", builder.getResult().getTitle());
+
+	builder.setTitle("Test New Title");
+
+	assertEquals("Test New Title", builder.getTitle());
+	assertEquals("Test New Title", builder.getResult().getTitle());
     }
 
     @Test
