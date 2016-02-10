@@ -21,8 +21,8 @@ public class DataCollectionBuilder
     private DataSource xData;
     private DataSource yData;
     private Resolution resolution;
-    private Map<String, List<MatchedDataPair>> resultData = new HashMap<String, List<MatchedDataPair>>();
-    private Map<String, MatchedDataPair> finalResult = new HashMap<String, MatchedDataPair>();
+    private Map<String, List<MatchedDataPair>> resultData;
+    private Map<String, MatchedDataPair> finalResult;
 
     /**
      * Creation of a builder that builds a {@link DataCollection}
@@ -152,6 +152,8 @@ public class DataCollectionBuilder
      */
     public DataCollection getResult()
     {
+	resultData = new HashMap<String, List<MatchedDataPair>>();
+	
 	Set<Entry<LocalDate, Double>> yDataPairs = yData.getData().entrySet();
 
 	for (Entry<LocalDate, Double> xData : xData.getData().entrySet())
@@ -166,6 +168,8 @@ public class DataCollectionBuilder
 	    }
 	}
 
+	finalResult = new HashMap<String, MatchedDataPair>();
+	
 	for (Entry<String, List<MatchedDataPair>> node : resultData.entrySet())
 	{
 	    finalResult.put(node.getKey(), mergeData(node.getValue(), xMergeType, yMergeType));
