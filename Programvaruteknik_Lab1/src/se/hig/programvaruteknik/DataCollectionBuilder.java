@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -110,34 +109,11 @@ public class DataCollectionBuilder
 	}
     }
 
-    static Double mergeData(List<MatchedDataPair> data, MergeType mergeType, Function<MatchedDataPair, Double> extractor)
-    {
-	Double value = 0d;
-	if (mergeType == MergeType.MEDIAN)
-	{
-	    value = extractor.apply(data.get((int) Math.floor(data.size() / 2)));
-	}
-	else
-	{
-	    for (MatchedDataPair pair : data)
-	    {
-		value += extractor.apply(pair);
-	    }
-
-	    if (mergeType == MergeType.AVERAGE)
-	    {
-		value /= data.size();
-	    }
-	}
-
-	return value;
-    }
-
     static MatchedDataPair mergeData(List<MatchedDataPair> data, MergeType xMergeType, MergeType yMergeType)
     {
 	return new MatchedDataPair(
-		mergeData(data, xMergeType, (pair) -> pair.getXValue()),
-		mergeData(data, yMergeType, (pair) -> pair.getYValue()));
+		xMergeType.merge(data, (pair) -> pair.getXValue()),
+		yMergeType.merge(data, (pair) -> pair.getYValue()));
     }
 
     static boolean isSameDate(Entry<LocalDate, Double> xEntry, Entry<LocalDate, Double> yEntry, Resolution resolution)

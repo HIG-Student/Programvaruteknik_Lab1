@@ -1,23 +1,50 @@
 package se.hig.programvaruteknik;
 
+import java.util.List;
+import java.util.function.Function;
+
 /**
- * How to merge values that occurs within the same
- * resolution group
+ * Lambda that defines how to merge {@link MatchedDataPair MatchedDataPairs}
  */
-public enum MergeType
+public interface MergeType
 {
     /**
      * Sum all values
      */
-    SUM,
+    public static MergeType SUM = (list, extractor) ->
+    {
+	Double sum = 0d;
+	for (MatchedDataPair pair : list)
+	    sum += extractor.apply(pair);
+	return sum;
+    };
 
     /**
      * Take the average of all values
      */
-    AVERAGE,
+    public static MergeType AVERAGE = (list, extractor) ->
+    {
+	return SUM.merge(list, extractor) / list.size();
+    };
 
     /**
      * Take the median of the values
      */
-    MEDIAN
+    public static MergeType MEDIAN = (list, extractor) ->
+    {
+	return extractor.apply(list.get((int) Math.floor(list.size() / 2)));
+    };
+
+    /**
+     * Merges {@link MatchedDataPair MatchedDataPairs}
+     * 
+     * @param data
+     *            {@link MatchedDataPair MatchedDataPairs}
+     * @param extractor
+     *            {@link Function Lambda} that extracts
+     *            the value form the
+     *            {@link MatchedDataPair}
+     * @return merged {@link MatchedDataPair}
+     */
+    public Double merge(List<MatchedDataPair> data, Function<MatchedDataPair, Double> extractor);
 }
