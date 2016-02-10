@@ -110,20 +110,12 @@ public class DataCollectionBuilder
 	}
     }
 
-    private void put(String key, MatchedDataPair pair)
-    {
-	if (!resultData.containsKey(key)) resultData.put(key, new LinkedList<>());
-
-	resultData.get(key).add(pair);
-    }
-
     static Double mergeData(List<MatchedDataPair> data, MergeType mergeType, Function<MatchedDataPair, Double> extractor)
     {
 	Double value = 0d;
 	if (mergeType == MergeType.MEDIAN)
 	{
-	    MatchedDataPair median = data.get((int) Math.floor(data.size() / 2));
-	    value = extractor.apply(median);
+	    value = extractor.apply(data.get((int) Math.floor(data.size() / 2)));
 	}
 	else
 	{
@@ -148,6 +140,14 @@ public class DataCollectionBuilder
 		mergeData(data, yMergeType, (pair) -> pair.getYValue()));
     }
 
+    private void addPair(Entry<LocalDate, Double> xEntry, Entry<LocalDate, Double> yEntry, Resolution resolution)
+    {
+	String key = localDateToString(xEntry.getKey(), resolution);
+
+	if (!resultData.containsKey(key)) resultData.put(key, new LinkedList<>());
+	resultData.get(key).add(new MatchedDataPair(xEntry.getValue(), yEntry.getValue()));
+    }
+
     /**
      * Build the {@link DataCollection}
      * 
@@ -157,18 +157,17 @@ public class DataCollectionBuilder
     {
 	resultData = new HashMap<String, List<MatchedDataPair>>();
 
-	Set<Entry<LocalDate, Double>> yDataPairs = yData.getData().entrySet();
+	Set<Entry<LocalDate, Double>> unMatchedYEntries = yData.getData().entrySet();
 
-	for (Entry<LocalDate, Double> xData : xData.getData().entrySet())
+	for (Entry<LocalDate, Double> xEntry : xData.getData().entrySet())
 	{
-	    for (Entry<LocalDate, Double> yData : yDataPairs.stream().collect(Collectors.toList()))
+	    for (Entry<LocalDate, Double> yEntry : unMatchedYEntries.stream().collect(Collectors.toList()))
 	    {
-		if (localDateToString(xData.getKey(), resolution).equals(localDateToString(yData.getKey(), resolution)))
+		if (localDateToString(xEntry.getKey(), resolution)
+			.equals(localDateToString(yEntry.getKey(), resolution)))
 		{
-		    put(
-			    localDateToString(xData.getKey(), resolution),
-			    new MatchedDataPair(xData.getValue(), yData.getValue()));
-		    yDataPairs.remove(yData);
+		    addPair(xEntry, yEntry, resolution);
+		    unMatchedYEntries.remove(yEntry);
 		}
 	    }
 	}
