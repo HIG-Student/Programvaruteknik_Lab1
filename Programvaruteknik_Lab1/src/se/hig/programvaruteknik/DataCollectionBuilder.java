@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -116,19 +117,19 @@ public class DataCollectionBuilder
 	resultData.get(key).add(pair);
     }
 
-    static Double mergeData(List<MatchedDataPair> data, MergeType mergeType, boolean xValue)
+    static Double mergeData(List<MatchedDataPair> data, MergeType mergeType, Function<MatchedDataPair, Double> extractor)
     {
 	Double value = 0d;
 	if (mergeType == MergeType.MEDIAN)
 	{
 	    MatchedDataPair median = data.get((int) Math.floor(data.size() / 2));
-	    value = xValue ? median.getXValue() : median.getYValue();
+	    value = extractor.apply(median);
 	}
 	else
 	{
 	    for (MatchedDataPair pair : data)
 	    {
-		value += xValue ? pair.getXValue() : pair.getYValue();
+		value += extractor.apply(pair);
 	    }
 
 	    if (mergeType == MergeType.AVERAGE)
@@ -142,7 +143,9 @@ public class DataCollectionBuilder
 
     static MatchedDataPair mergeData(List<MatchedDataPair> data, MergeType xMergeType, MergeType yMergeType)
     {
-	return new MatchedDataPair(mergeData(data, xMergeType, true), mergeData(data, yMergeType, false));
+	return new MatchedDataPair(
+		mergeData(data, xMergeType, (pair) -> pair.getXValue()),
+		mergeData(data, yMergeType, (pair) -> pair.getYValue()));
     }
 
     /**
@@ -153,7 +156,7 @@ public class DataCollectionBuilder
     public DataCollection getResult()
     {
 	resultData = new HashMap<String, List<MatchedDataPair>>();
-	
+
 	Set<Entry<LocalDate, Double>> yDataPairs = yData.getData().entrySet();
 
 	for (Entry<LocalDate, Double> xData : xData.getData().entrySet())
@@ -162,14 +165,16 @@ public class DataCollectionBuilder
 	    {
 		if (localDateToString(xData.getKey(), resolution).equals(localDateToString(yData.getKey(), resolution)))
 		{
-		    put(localDateToString(xData.getKey(), resolution), new MatchedDataPair(xData.getValue(), yData.getValue()));
+		    put(
+			    localDateToString(xData.getKey(), resolution),
+			    new MatchedDataPair(xData.getValue(), yData.getValue()));
 		    yDataPairs.remove(yData);
 		}
 	    }
 	}
 
 	finalResult = new HashMap<String, MatchedDataPair>();
-	
+
 	for (Entry<String, List<MatchedDataPair>> node : resultData.entrySet())
 	{
 	    finalResult.put(node.getKey(), mergeData(node.getValue(), xMergeType, yMergeType));
