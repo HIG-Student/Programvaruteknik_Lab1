@@ -90,25 +90,6 @@ public class DataCollectionBuilder
 	return this;
     }
 
-    static String localDateToString(LocalDate date, Resolution resolution)
-    {
-	switch (resolution)
-	{
-	case DAY:
-	    return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-	case WEEK:
-	    return date.format(DateTimeFormatter.ofPattern("YYYY-'W'w"));
-	case MONTH:
-	    return date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
-	case QUARTER:
-	    return date.format(DateTimeFormatter.ofPattern("yyyy-'Q'Q"));
-	case YEAR:
-	    return date.format(DateTimeFormatter.ofPattern("yyyy"));
-	default:
-	    throw new RuntimeException("Unknown resolution!");
-	}
-    }
-
     static MatchedDataPair mergeData(List<MatchedDataPair> data, MergeType xMergeType, MergeType yMergeType)
     {
 	return new MatchedDataPair(
@@ -118,7 +99,7 @@ public class DataCollectionBuilder
 
     static boolean isSameDate(Entry<LocalDate, Double> xEntry, Entry<LocalDate, Double> yEntry, Resolution resolution)
     {
-	return localDateToString(xEntry.getKey(), resolution).equals(localDateToString(yEntry.getKey(), resolution));
+	return resolution.toKey(xEntry).equals(resolution.toKey(yEntry));
     }
 
     static List<Entry<LocalDate, Double>> cloneSetToList(Set<Entry<LocalDate, Double>> set)
@@ -140,7 +121,7 @@ public class DataCollectionBuilder
 
     static void addPair(Map<String, List<MatchedDataPair>> map, Entry<LocalDate, Double> xEntry, Entry<LocalDate, Double> yEntry, Resolution resolution)
     {
-	String key = localDateToString(xEntry.getKey(), resolution);
+	String key = resolution.toKey(xEntry);
 
 	if (!map.containsKey(key)) map.put(key, new LinkedList<>());
 	map.get(key).add(new MatchedDataPair(xEntry.getValue(), yEntry.getValue()));
