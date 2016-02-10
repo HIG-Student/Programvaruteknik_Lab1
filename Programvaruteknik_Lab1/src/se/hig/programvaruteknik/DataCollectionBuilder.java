@@ -22,8 +22,8 @@ public class DataCollectionBuilder
     private DataSource xData;
     private DataSource yData;
     private Resolution resolution;
-    private Map<String, List<MatchedDataPair>> resultData;
-    private Map<String, MatchedDataPair> finalResult;
+    private Map<String, List<MatchedDataPair>> resultData;// TODO: Ask to remove
+    private Map<String, MatchedDataPair> finalResult;// TODO: Ask to remove
 
     /**
      * Creation of a builder that builds a {@link DataCollection}
@@ -140,12 +140,55 @@ public class DataCollectionBuilder
 		mergeData(data, yMergeType, (pair) -> pair.getYValue()));
     }
 
-    private void addPair(Entry<LocalDate, Double> xEntry, Entry<LocalDate, Double> yEntry, Resolution resolution)
+    static boolean isSameDate(Entry<LocalDate, Double> xEntry, Entry<LocalDate, Double> yEntry, Resolution resolution)
+    {
+	return localDateToString(xEntry.getKey(), resolution).equals(localDateToString(yEntry.getKey(), resolution));
+    }
+
+    static List<Entry<LocalDate, Double>> cloneSetToList(Set<Entry<LocalDate, Double>> set)
+    {
+	return set.stream().collect(Collectors.toList());
+    }
+
+    static Map<String, MatchedDataPair> mergeMatchedData(Map<String, List<MatchedDataPair>> matchedData, MergeType xMergeType, MergeType yMergeType)
+    {
+	Map<String, MatchedDataPair> result = new HashMap<String, MatchedDataPair>();
+
+	for (Entry<String, List<MatchedDataPair>> node : matchedData.entrySet())
+	{
+	    result.put(node.getKey(), mergeData(node.getValue(), xMergeType, yMergeType));
+	}
+
+	return result;
+    }
+
+    static void addPair(Map<String, List<MatchedDataPair>> map, Entry<LocalDate, Double> xEntry, Entry<LocalDate, Double> yEntry, Resolution resolution)
     {
 	String key = localDateToString(xEntry.getKey(), resolution);
 
-	if (!resultData.containsKey(key)) resultData.put(key, new LinkedList<>());
-	resultData.get(key).add(new MatchedDataPair(xEntry.getValue(), yEntry.getValue()));
+	if (!map.containsKey(key)) map.put(key, new LinkedList<>());
+	map.get(key).add(new MatchedDataPair(xEntry.getValue(), yEntry.getValue()));
+    }
+
+    static Map<String, List<MatchedDataPair>> matchPairsUsingResolution(DataSource xSource, DataSource ySource, Resolution resolution)
+    {
+	Map<String, List<MatchedDataPair>> result = new HashMap<String, List<MatchedDataPair>>();
+
+	Set<Entry<LocalDate, Double>> unMatchedYEntries = ySource.getData().entrySet();
+
+	for (Entry<LocalDate, Double> xEntry : xSource.getData().entrySet())
+	{
+	    for (Entry<LocalDate, Double> yEntry : cloneSetToList(unMatchedYEntries))
+	    {
+		if (isSameDate(xEntry, yEntry, resolution))
+		{
+		    addPair(result, xEntry, yEntry, resolution);
+		    unMatchedYEntries.remove(yEntry);
+		}
+	    }
+	}
+
+	return result;
     }
 
     /**
@@ -155,30 +198,10 @@ public class DataCollectionBuilder
      */
     public DataCollection getResult()
     {
-	resultData = new HashMap<String, List<MatchedDataPair>>();
-
-	Set<Entry<LocalDate, Double>> unMatchedYEntries = yData.getData().entrySet();
-
-	for (Entry<LocalDate, Double> xEntry : xData.getData().entrySet())
-	{
-	    for (Entry<LocalDate, Double> yEntry : unMatchedYEntries.stream().collect(Collectors.toList()))
-	    {
-		if (localDateToString(xEntry.getKey(), resolution)
-			.equals(localDateToString(yEntry.getKey(), resolution)))
-		{
-		    addPair(xEntry, yEntry, resolution);
-		    unMatchedYEntries.remove(yEntry);
-		}
-	    }
-	}
-
-	finalResult = new HashMap<String, MatchedDataPair>();
-
-	for (Entry<String, List<MatchedDataPair>> node : resultData.entrySet())
-	{
-	    finalResult.put(node.getKey(), mergeData(node.getValue(), xMergeType, yMergeType));
-	}
-
-	return new DataCollection(getTitle(), xData.getUnit(), yData.getUnit(), finalResult);
+	return new DataCollection(
+		getTitle(),
+		xData.getUnit(),
+		yData.getUnit(),
+		mergeMatchedData(matchPairsUsingResolution(xData, yData, resolution), xMergeType, yMergeType));
     }
 }
