@@ -11,7 +11,7 @@ public interface MergeType
     /**
      * Sum all values
      */
-    public static MergeType SUM = (list, extractor) ->
+    public final static MergeType SUM = (list, extractor) ->
     {
 	Double sum = 0d;
 	for (MatchedDataPair pair : list)
@@ -22,7 +22,7 @@ public interface MergeType
     /**
      * Take the average of all values
      */
-    public static MergeType AVERAGE = (list, extractor) ->
+    public final static MergeType AVERAGE = (list, extractor) ->
     {
 	return SUM.merge(list, extractor) / list.size();
     };
@@ -30,7 +30,7 @@ public interface MergeType
     /**
      * Take the median of the values
      */
-    public static MergeType MEDIAN = (list, extractor) ->
+    public final static MergeType MEDIAN = (list, extractor) ->
     {
 	return extractor.apply(list.get((int) Math.floor(list.size() / 2)));
     };
