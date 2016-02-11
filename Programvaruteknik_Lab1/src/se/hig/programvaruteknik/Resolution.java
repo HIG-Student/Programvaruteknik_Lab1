@@ -12,62 +12,39 @@ public enum Resolution
     /**
      * Group into years
      */
-    YEAR
-    {
-	@Override
-	public String toKey(LocalDate date)
-	{
-	    return date.format(DateTimeFormatter.ofPattern("yyyy"));
-	}
-    },
+    YEAR("yyyy"),
 
     /**
      * Group into quarters of a year
      */
-    QUARTER
-    {
-	@Override
-	public String toKey(LocalDate date)
-	{
-	    return date.format(DateTimeFormatter.ofPattern("yyyy-'Q'Q"));
-	}
-    },
+    QUARTER("yyyy-'Q'Q"),
 
     /**
      * Group into months
      */
-    MONTH
-    {
-	@Override
-	public String toKey(LocalDate date)
-	{
-	    return date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
-	}
-    },
+    MONTH("yyyy-MM"),
 
     /**
      * Group into weeks
      */
-    WEEK
-    {
-	@Override
-	public String toKey(LocalDate date)
-	{
-	    return date.format(DateTimeFormatter.ofPattern("YYYY-'W'w"));
-	}
-    },
+    WEEK("YYYY-'W'w"),
 
     /**
      * Group into days
      */
-    DAY
+    DAY("yyyy-MM-dd");
+
+    private final ResolutionResolver resolver;
+
+    Resolution(ResolutionResolver resolver)
     {
-	@Override
-	public String toKey(LocalDate date)
-	{
-	    return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-	}
-    };
+	this.resolver = resolver;
+    }
+
+    Resolution(String pattern)
+    {
+	this.resolver = (date) -> date.format(DateTimeFormatter.ofPattern(pattern));
+    }
 
     /**
      * Converts a {@link LocalDate} to a key
@@ -76,7 +53,10 @@ public enum Resolution
      *            the {@link LocalDate} to convert
      * @return The key
      */
-    public abstract String toKey(LocalDate date);
+    public String toKey(LocalDate date)
+    {
+	return resolver.resolve(date);
+    }
 
     /**
      * Converts a {@link Entry} to a key
@@ -89,4 +69,9 @@ public enum Resolution
     {
 	return toKey(entry.getKey());
     }
+}
+
+interface ResolutionResolver
+{
+    public String resolve(LocalDate date);
 }
