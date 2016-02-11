@@ -20,8 +20,7 @@ public class DataCollectionBuilder
     private DataSource xData;
     private DataSource yData;
     private Resolution resolution;
-    private Map<String, List<MatchedDataPair>> resultData;// TODO: Ask to remove
-    private Map<String, MatchedDataPair> finalResult;// TODO: Ask to remove
+    private Map<String, MatchedDataPair> bufferedResult = null;
 
     /**
      * Creation of a builder that builds a {@link DataCollection}
@@ -54,6 +53,21 @@ public class DataCollectionBuilder
     }
 
     /**
+     * Sets the resolution
+     * 
+     * @param resolution
+     *            The new resolution
+     * @return this builder (for chaining)
+     */
+    public DataCollectionBuilder setResolution(Resolution resolution)
+    {
+	if (!this.resolution.equals(resolution)) bufferedResult = null;
+
+	this.resolution = resolution;
+	return this;
+    }
+
+    /**
      * Gets the title
      * 
      * @return The title
@@ -72,6 +86,8 @@ public class DataCollectionBuilder
      */
     public DataCollectionBuilder setXMergeType(MergeType xMergeType)
     {
+	if (!this.xMergeType.equals(xMergeType)) bufferedResult = null;
+
 	this.xMergeType = xMergeType;
 	return this;
     }
@@ -85,6 +101,8 @@ public class DataCollectionBuilder
      */
     public DataCollectionBuilder setYMergeType(MergeType yMergeType)
     {
+	if (!this.yMergeType.equals(yMergeType)) bufferedResult = null;
+
 	this.yMergeType = yMergeType;
 	return this;
     }
@@ -152,6 +170,18 @@ public class DataCollectionBuilder
 	return result;
     }
 
+    private Map<String, MatchedDataPair> getFromBuffer()
+    {
+	if (bufferedResult == null)
+	{
+	    bufferedResult = mergeMatchedData(
+		    matchPairsUsingResolution(xData, yData, resolution),
+		    xMergeType,
+		    yMergeType);
+	}
+	return bufferedResult;
+    }
+
     /**
      * Build the {@link DataCollection}
      * 
@@ -159,10 +189,6 @@ public class DataCollectionBuilder
      */
     public DataCollection getResult()
     {
-	return new DataCollection(
-		getTitle(),
-		xData.getUnit(),
-		yData.getUnit(),
-		mergeMatchedData(matchPairsUsingResolution(xData, yData, resolution), xMergeType, yMergeType));
+	return new DataCollection(getTitle(), xData.getUnit(), yData.getUnit(), getFromBuffer());
     }
 }
