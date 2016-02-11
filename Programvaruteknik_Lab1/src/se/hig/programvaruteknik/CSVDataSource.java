@@ -22,12 +22,12 @@ public class CSVDataSource implements DataSource
      * @param unit
      *            The unit of the data
      * @param filePath
-     *            The file to read<br>
-     *            The first line is considered a comment<br>
+     *            The file to read<br />
+     *            The first line is considered a comment<br />
      *            The second line is "{collection name};{unit name}", the rest
      *            should be:
-     *            <br>
-     *            date;double[;whatever]<br>
+     *            <br />
+     *            date;double[;whatever]<br />
      *            Where the data after the double is ignored
      * @throws RuntimeException
      *             If error occurs
