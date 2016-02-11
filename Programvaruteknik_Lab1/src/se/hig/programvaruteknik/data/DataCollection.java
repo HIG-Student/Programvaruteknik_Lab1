@@ -1,4 +1,4 @@
-package se.hig.programvaruteknik;
+package se.hig.programvaruteknik.data;
 
 import java.util.Map;
 

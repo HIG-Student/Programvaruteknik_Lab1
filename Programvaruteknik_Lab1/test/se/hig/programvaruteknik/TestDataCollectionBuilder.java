@@ -10,6 +10,12 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import se.hig.programvaruteknik.data.DataCollectionBuilder;
+import se.hig.programvaruteknik.data.DataSource;
+import se.hig.programvaruteknik.data.MatchedDataPair;
+import se.hig.programvaruteknik.data.MergeType;
+import se.hig.programvaruteknik.data.Resolution;
+
 @SuppressWarnings("javadoc")
 public class TestDataCollectionBuilder
 {

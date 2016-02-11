@@ -1,4 +1,4 @@
-package se.hig.programvaruteknik;
+package se.hig.programvaruteknik.data;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
