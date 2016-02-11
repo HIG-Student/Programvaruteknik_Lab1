@@ -9,8 +9,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import se.hig.programvaruteknik.data.CSVDataSource;
-
 @SuppressWarnings("javadoc")
 public class TestCSVDataSource
 {

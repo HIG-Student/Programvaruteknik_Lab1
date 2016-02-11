@@ -6,8 +6,6 @@ import java.time.LocalDate;
 
 import org.junit.Test;
 
-import se.hig.programvaruteknik.data.Resolution;
-
 @SuppressWarnings("javadoc")
 public class TestResolution
 {

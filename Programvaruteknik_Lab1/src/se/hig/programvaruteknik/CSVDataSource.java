@@ -1,4 +1,4 @@
-package se.hig.programvaruteknik.data;
+package se.hig.programvaruteknik;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
