@@ -106,6 +106,11 @@ public class DataCollectionBuilder
 	return set.stream().collect(Collectors.toList());
     }
 
+    static List<Entry<LocalDate, Double>> cloneList(List<Entry<LocalDate, Double>> list)
+    {
+	return list.stream().collect(Collectors.toList());
+    }
+
     static Map<String, MatchedDataPair> mergeMatchedData(Map<String, List<MatchedDataPair>> matchedData, MergeType xMergeType, MergeType yMergeType)
     {
 	Map<String, MatchedDataPair> result = new HashMap<String, MatchedDataPair>();
@@ -130,11 +135,11 @@ public class DataCollectionBuilder
     {
 	Map<String, List<MatchedDataPair>> result = new HashMap<String, List<MatchedDataPair>>();
 
-	Set<Entry<LocalDate, Double>> unMatchedYEntries = ySource.getData().entrySet();
+	List<Entry<LocalDate, Double>> unMatchedYEntries = cloneSetToList(ySource.getData().entrySet());
 
 	for (Entry<LocalDate, Double> xEntry : xSource.getData().entrySet())
 	{
-	    for (Entry<LocalDate, Double> yEntry : cloneSetToList(unMatchedYEntries))
+	    for (Entry<LocalDate, Double> yEntry : cloneList(unMatchedYEntries))
 	    {
 		if (isSameDate(xEntry, yEntry, resolution))
 		{

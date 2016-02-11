@@ -3,6 +3,7 @@ package se.hig.programvaruteknik;
 import static org.junit.Assert.*;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -90,7 +91,7 @@ public class TestDataCollectionBuilder
 	    @Override
 	    public Map<LocalDate, Double> getData()
 	    {
-		return data;
+		return Collections.unmodifiableMap(data);
 	    }
 	};
     }
