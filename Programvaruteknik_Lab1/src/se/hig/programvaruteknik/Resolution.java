@@ -43,7 +43,7 @@ public enum Resolution
 
     Resolution(String pattern)
     {
-	this.resolver = (date) -> date.format(DateTimeFormatter.ofPattern(pattern));
+	this((date) -> date.format(DateTimeFormatter.ofPattern(pattern)));
     }
 
     /**
@@ -69,9 +69,9 @@ public enum Resolution
     {
 	return toKey(entry.getKey());
     }
-}
 
-interface ResolutionResolver
-{
-    public String resolve(LocalDate date);
+    private interface ResolutionResolver
+    {
+	public String resolve(LocalDate date);
+    }
 }
