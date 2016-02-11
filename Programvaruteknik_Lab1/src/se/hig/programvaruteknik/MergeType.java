@@ -24,6 +24,8 @@ public interface MergeType
      */
     public final static MergeType AVERAGE = (list, extractor) ->
     {
+	if (list.size() == 0) return 0d;
+
 	return SUM.merge(list, extractor) / list.size();
     };
 
@@ -32,6 +34,8 @@ public interface MergeType
      */
     public final static MergeType MEDIAN = (list, extractor) ->
     {
+	if (list.size() == 0) return 0d;
+
 	return extractor.apply(list.get((int) Math.floor(list.size() / 2)));
     };
 
