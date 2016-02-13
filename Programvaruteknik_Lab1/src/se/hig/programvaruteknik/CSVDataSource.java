@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * A {@link DataSource} that can be serializable
  */
-public class CSVDataSource implements DataSource
+public class CSVDataSource extends UnmodifiableDataSource
 {
     private Map<LocalDate, Double> data;
     private String name;
@@ -78,8 +78,8 @@ public class CSVDataSource implements DataSource
      * @return {@link Collections#unmodifiableMap Unmodifiable} Map
      */
     @Override
-    public Map<LocalDate, Double> getData()
+    public Map<LocalDate, Double> getRawData()
     {
-	return Collections.unmodifiableMap(data);
+	return data;
     }
 }
