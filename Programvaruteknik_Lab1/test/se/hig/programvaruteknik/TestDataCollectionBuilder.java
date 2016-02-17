@@ -73,7 +73,7 @@ public class TestDataCollectionBuilder
 	}
     });
 
-    private DataSource getDataSource(String name, String unit, HashMap<LocalDate, Double> data)
+    private static DataSource getDataSource(String name, String unit, HashMap<LocalDate, Double> data)
     {
 	return new DataSource()
 	{
@@ -98,7 +98,7 @@ public class TestDataCollectionBuilder
     }
 
     @SuppressWarnings("serial")
-    private DataSource getDataSourceA()
+    private static DataSource getDataSourceA()
     {
 	return getDataSource("sourceA", "A", new HashMap<LocalDate, Double>()
 	{
@@ -112,7 +112,7 @@ public class TestDataCollectionBuilder
     }
 
     @SuppressWarnings("serial")
-    private DataSource getDataSourceB()
+    private static DataSource getDataSourceB()
     {
 	return getDataSource("sourceB", "B", new HashMap<LocalDate, Double>()
 	{
@@ -130,7 +130,7 @@ public class TestDataCollectionBuilder
 	public void test(LocalDate date, Double x, Double y);
     }
 
-    private void testCollection(Resolution resolution, MergeType mergeType, testCollectionCase testCase)
+    private static void testCollection(Resolution resolution, MergeType mergeType, testCollectionCase testCase)
     {
 	DataCollectionBuilder builder = new DataCollectionBuilder(getDataSourceA(), getDataSourceB(), resolution);
 	builder.setXMergeType(mergeType);
