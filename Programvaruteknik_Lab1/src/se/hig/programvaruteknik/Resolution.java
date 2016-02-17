@@ -2,6 +2,7 @@ package se.hig.programvaruteknik;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 /**
@@ -10,27 +11,42 @@ import java.util.Map.Entry;
 public enum Resolution
 {
     /**
-     * Group into years
+     * Group into years<br>
+     * <br>
+     * Uses {@link DateTimeFormatter#ofPattern(String,Locale)
+     * DateTimeFormatter.ofPattern("yyyy",Locale.UK)}
      */
     YEAR("yyyy"),
 
     /**
-     * Group into quarters of a year
+     * Group into quarters of a year<br>
+     * <br>
+     * Uses {@link DateTimeFormatter#ofPattern(String,Locale)
+     * DateTimeFormatter.ofPattern("yyyy-'Q'Q",Locale.UK)}
      */
     QUARTER("yyyy-'Q'Q"),
 
     /**
-     * Group into months
+     * Group into months<br>
+     * <br>
+     * Uses {@link DateTimeFormatter#ofPattern(String,Locale)
+     * DateTimeFormatter.ofPattern("yyyy-MM",Locale.UK)}
      */
     MONTH("yyyy-MM"),
 
     /**
-     * Group into weeks
+     * Group into weeks<br>
+     * <br>
+     * Uses {@link DateTimeFormatter#ofPattern(String,Locale)
+     * DateTimeFormatter.ofPattern("YYYY-'W'w",Locale.UK)}
      */
     WEEK("YYYY-'W'w"),
 
     /**
-     * Group into days
+     * Group into days<br>
+     * <br>
+     * Uses {@link DateTimeFormatter#ofPattern(String,Locale)
+     * DateTimeFormatter.ofPattern("yyyy-MM-dd",Locale.UK)}
      */
     DAY("yyyy-MM-dd");
 
@@ -41,9 +57,23 @@ public enum Resolution
 	this.resolver = resolver;
     }
 
+    /**
+     * @param pattern
+     *            the pattern to give to<br>
+     *            {@link DateTimeFormatter#ofPattern(String,Locale)}<br>
+     *            Where Locale is {@link Locale#UK}<br>
+     *            <br>
+     *            Negative years appends '-' in that method<br>
+     *            Years over 9999 appends '+' in that method<br>
+     */
     Resolution(String pattern)
     {
-	final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+	// We use a specific Locale because the default locale can be different
+	// on different computers
+	// Locale.UK is used because it have the correct handling of Weeks
+	// (starts on Mondays) that is not found in the Locale.ROOT, which we
+	// would otherwise use
+	final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern, Locale.UK);
 	resolver = (date) -> date.format(formatter);
     }
 
