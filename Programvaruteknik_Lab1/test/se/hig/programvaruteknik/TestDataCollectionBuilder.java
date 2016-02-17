@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -14,7 +15,7 @@ import org.junit.Test;
 public class TestDataCollectionBuilder
 {
     @SuppressWarnings("serial")
-    private static final LinkedList<LocalDate> dates = new LinkedList<LocalDate>()
+    private static final List<LocalDate> dates = Collections.unmodifiableList(new LinkedList<LocalDate>()
     {
 	{
 	    // YEAR
@@ -70,7 +71,7 @@ public class TestDataCollectionBuilder
 		}
 	    }
 	}
-    };
+    });
 
     private DataSource getDataSource(String name, String unit, HashMap<LocalDate, Double> data)
     {
