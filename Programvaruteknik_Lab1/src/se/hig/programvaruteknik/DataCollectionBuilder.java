@@ -1,12 +1,8 @@
 package se.hig.programvaruteknik;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -109,77 +105,45 @@ public class DataCollectionBuilder
 	return this;
     }
 
-    static MatchedDataPair mergeData(List<MatchedDataPair> data, MergeType xMergeType, MergeType yMergeType)
+    static Map<String, MatchedDataPair> matchData(DataSource xSource, MergeType xMergeType, DataSource ySource, MergeType yMergeType, Resolution resolution)
     {
-	return new MatchedDataPair(
-		xMergeType.merge(data, (pair) -> pair.getXValue()),
-		yMergeType.merge(data, (pair) -> pair.getYValue()));
-    }
+	List<String> commonKeys = xSource
+		.getData()
+		.keySet()
+		.stream()
+		.filter((key) -> ySource.getData().containsKey(key))
+		.map(resolution::toKey)
+		.distinct()
+		.collect(Collectors.toList());
 
-    static boolean isSameDate(Entry<LocalDate, Double> xEntry, Entry<LocalDate, Double> yEntry, Resolution resolution)
-    {
-	return resolution.toKey(xEntry).equals(resolution.toKey(yEntry));
-    }
+	Function<DataSource, Map<String, List<Double>>> dataOrganizer = (source) -> source
+		.getData()
+		.entrySet()
+		.stream()
+		.filter((entry) -> commonKeys.contains(resolution.toKey(entry)))
+		.collect(
+			Collectors.groupingBy(
+				(entry) -> resolution.toKey(entry),
+				Collectors.mapping((entry) -> entry.getValue(), Collectors.toList())));
 
-    static List<Entry<LocalDate, Double>> cloneSetToList(Set<Entry<LocalDate, Double>> set)
-    {
-	return set.stream().collect(Collectors.toList());
-    }
+	Map<String, List<Double>> xData = dataOrganizer.apply(xSource);
+	Map<String, List<Double>> yData = dataOrganizer.apply(ySource);
 
-    static List<Entry<LocalDate, Double>> cloneList(List<Entry<LocalDate, Double>> list)
-    {
-	return list.stream().collect(Collectors.toList());
-    }
+	Map<String, MatchedDataPair> matches = commonKeys.stream().collect(
+		Collectors.<String, String, MatchedDataPair> toMap(
+			key -> key,
+			key -> new MatchedDataPair(
+				xMergeType.merge(xData.get(key)),
+				yMergeType.merge(yData.get(key)))));
 
-    static Map<String, MatchedDataPair> mergeMatchedPairs(Map<String, List<MatchedDataPair>> matchedData, MergeType xMergeType, MergeType yMergeType)
-    {
-	Map<String, MatchedDataPair> result = new HashMap<String, MatchedDataPair>();
-
-	for (Entry<String, List<MatchedDataPair>> node : matchedData.entrySet())
-	{
-	    result.put(node.getKey(), mergeData(node.getValue(), xMergeType, yMergeType));
-	}
-
-	return result;
-    }
-
-    static void addPair(Map<String, List<MatchedDataPair>> map, Entry<LocalDate, Double> xEntry, Entry<LocalDate, Double> yEntry, Resolution resolution)
-    {
-	String key = resolution.toKey(xEntry);
-
-	if (!map.containsKey(key)) map.put(key, new LinkedList<>());
-	map.get(key).add(new MatchedDataPair(xEntry.getValue(), yEntry.getValue()));
-    }
-
-    static Map<String, List<MatchedDataPair>> matchPairsUsingResolution(DataSource xSource, DataSource ySource, Resolution resolution)
-    {
-	Map<String, List<MatchedDataPair>> result = new HashMap<String, List<MatchedDataPair>>();
-
-	List<Entry<LocalDate, Double>> unMatchedYEntries = cloneSetToList(ySource.getData().entrySet());
-
-	for (Entry<LocalDate, Double> xEntry : xSource.getData().entrySet())
-	{
-	    for (Entry<LocalDate, Double> yEntry : cloneList(unMatchedYEntries))
-	    {
-		if (isSameDate(xEntry, yEntry, resolution))
-		{
-		    addPair(result, xEntry, yEntry, resolution);
-		    unMatchedYEntries.remove(yEntry);
-		}
-	    }
-	}
-
-	return result;
+	return matches;
     }
 
     private Map<String, MatchedDataPair> getFromCache()
     {
 	if (cachedResult == null)
 	{
-	    cachedResult = mergeMatchedPairs(
-		    matchPairsUsingResolution(xData, yData, resolution),
-		    xMergeType,
-		    yMergeType);
+	    cachedResult = matchData(xData, xMergeType, yData, yMergeType, resolution);
 	}
 	return cachedResult;
     }
