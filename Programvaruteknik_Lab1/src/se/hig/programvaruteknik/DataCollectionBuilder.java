@@ -10,7 +10,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * A builder for {@link DataCollection}s
+ * A builder for {@link DataCollection}s<br>
+ * <br>
+ * Merge types defaults to {@link MergeType#SUM}
  */
 public class DataCollectionBuilder
 {
