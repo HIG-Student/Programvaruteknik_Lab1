@@ -20,7 +20,7 @@ public class DataCollectionBuilder
     private DataSource xData;
     private DataSource yData;
     private Resolution resolution;
-    private Map<String, MatchedDataPair> bufferedResult = null;
+    private Map<String, MatchedDataPair> cachedResult = null;
 
     /**
      * Creation of a builder that builds a {@link DataCollection}
@@ -61,7 +61,7 @@ public class DataCollectionBuilder
      */
     public DataCollectionBuilder setResolution(Resolution resolution)
     {
-	if (!this.resolution.equals(resolution)) bufferedResult = null;
+	if (!this.resolution.equals(resolution)) cachedResult = null;
 
 	this.resolution = resolution;
 	return this;
@@ -86,7 +86,7 @@ public class DataCollectionBuilder
      */
     public DataCollectionBuilder setXMergeType(MergeType xMergeType)
     {
-	if (!this.xMergeType.equals(xMergeType)) bufferedResult = null;
+	if (!this.xMergeType.equals(xMergeType)) cachedResult = null;
 
 	this.xMergeType = xMergeType;
 	return this;
@@ -101,7 +101,7 @@ public class DataCollectionBuilder
      */
     public DataCollectionBuilder setYMergeType(MergeType yMergeType)
     {
-	if (!this.yMergeType.equals(yMergeType)) bufferedResult = null;
+	if (!this.yMergeType.equals(yMergeType)) cachedResult = null;
 
 	this.yMergeType = yMergeType;
 	return this;
@@ -129,7 +129,7 @@ public class DataCollectionBuilder
 	return list.stream().collect(Collectors.toList());
     }
 
-    static Map<String, MatchedDataPair> mergeMatchedData(Map<String, List<MatchedDataPair>> matchedData, MergeType xMergeType, MergeType yMergeType)
+    static Map<String, MatchedDataPair> mergeMatchedPairs(Map<String, List<MatchedDataPair>> matchedData, MergeType xMergeType, MergeType yMergeType)
     {
 	Map<String, MatchedDataPair> result = new HashMap<String, MatchedDataPair>();
 
@@ -170,16 +170,16 @@ public class DataCollectionBuilder
 	return result;
     }
 
-    private Map<String, MatchedDataPair> getFromBuffer()
+    private Map<String, MatchedDataPair> getFromCache()
     {
-	if (bufferedResult == null)
+	if (cachedResult == null)
 	{
-	    bufferedResult = mergeMatchedData(
+	    cachedResult = mergeMatchedPairs(
 		    matchPairsUsingResolution(xData, yData, resolution),
 		    xMergeType,
 		    yMergeType);
 	}
-	return bufferedResult;
+	return cachedResult;
     }
 
     /**
@@ -189,6 +189,6 @@ public class DataCollectionBuilder
      */
     public DataCollection getResult()
     {
-	return new DataCollection(getTitle(), xData.getUnit(), yData.getUnit(), getFromBuffer());
+	return new DataCollection(getTitle(), xData.getUnit(), yData.getUnit(), getFromCache());
     }
 }
